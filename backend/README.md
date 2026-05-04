@@ -245,6 +245,82 @@ Test unauthenticated analyze fails:
 Invoke-WebRequest -Method Post -Uri "http://127.0.0.1:8000/projects/$projectId/analyze" -SkipHttpErrorCheck
 ```
 
+## Manual Follow-Up Question Testing
+
+Login:
+
+```powershell
+$session = New-Object Microsoft.PowerShell.Commands.WebRequestSession
+$loginBody = @{ email = "phase5@example.com"; password = "ChangeMe123!" } | ConvertTo-Json
+try {
+  Invoke-RestMethod -Method Post -Uri "http://127.0.0.1:8000/auth/signup" -WebSession $session -ContentType "application/json" -Body (@{ email = "phase5@example.com"; password = "ChangeMe123!"; display_name = "Phase 5 User" } | ConvertTo-Json)
+} catch {}
+Invoke-RestMethod -Method Post -Uri "http://127.0.0.1:8000/auth/login" -WebSession $session -ContentType "application/json" -Body $loginBody
+```
+
+Create a project:
+
+```powershell
+$project = Invoke-RestMethod -Method Post -Uri "http://127.0.0.1:8000/projects" -WebSession $session -ContentType "application/json" -Body (@{ name = "Phase 5 Sample"; description = "Question answering smoke test" } | ConvertTo-Json)
+$projectId = $project.id
+```
+
+Add files:
+
+```powershell
+$filesBody = @{
+  files = @(
+    @{
+      path = "package.json"
+      language = "JSON"
+      content = "{ `"scripts`": { `"dev`": `"next dev`" }, `"dependencies`": { `"next`": `"latest`", `"react`": `"latest`" } }"
+    },
+    @{
+      path = "src/App.tsx"
+      language = "TypeScript"
+      content = "export default function App() { return <main>Hello from the app entry component</main>; }"
+    }
+  )
+} | ConvertTo-Json -Depth 5
+Invoke-RestMethod -Method Post -Uri "http://127.0.0.1:8000/projects/$projectId/files" -WebSession $session -ContentType "application/json" -Body $filesBody
+```
+
+Analyze the project:
+
+```powershell
+Invoke-RestMethod -Method Post -Uri "http://127.0.0.1:8000/projects/$projectId/analyze" -WebSession $session
+```
+
+Ask a follow-up question:
+
+```powershell
+$questionBody = @{ question = "Where does this app start?" } | ConvertTo-Json
+Invoke-RestMethod -Method Post -Uri "http://127.0.0.1:8000/projects/$projectId/questions" -WebSession $session -ContentType "application/json" -Body $questionBody
+```
+
+Get question history:
+
+```powershell
+Invoke-RestMethod -Method Get -Uri "http://127.0.0.1:8000/projects/$projectId/questions?page=1&page_size=10" -WebSession $session
+```
+
+Confirm unauthenticated question requests fail:
+
+```powershell
+Invoke-WebRequest -Method Post -Uri "http://127.0.0.1:8000/projects/$projectId/questions" -ContentType "application/json" -Body $questionBody -SkipHttpErrorCheck
+```
+
+Confirm another user cannot ask questions about the first user's project:
+
+```powershell
+$otherSession = New-Object Microsoft.PowerShell.Commands.WebRequestSession
+try {
+  Invoke-RestMethod -Method Post -Uri "http://127.0.0.1:8000/auth/signup" -WebSession $otherSession -ContentType "application/json" -Body (@{ email = "phase5-other@example.com"; password = "ChangeMe123!"; display_name = "Other User" } | ConvertTo-Json)
+} catch {}
+Invoke-RestMethod -Method Post -Uri "http://127.0.0.1:8000/auth/login" -WebSession $otherSession -ContentType "application/json" -Body (@{ email = "phase5-other@example.com"; password = "ChangeMe123!" } | ConvertTo-Json)
+Invoke-WebRequest -Method Post -Uri "http://127.0.0.1:8000/projects/$projectId/questions" -WebSession $otherSession -ContentType "application/json" -Body $questionBody -SkipHttpErrorCheck
+```
+
 ## Implemented Scope
 
 - FastAPI application startup
@@ -257,7 +333,8 @@ Invoke-WebRequest -Method Post -Uri "http://127.0.0.1:8000/projects/$projectId/a
 - Secure signup, login, current-user, and logout auth routes
 - Authenticated project creation, pagination, lookup, deletion, and secure code file storage
 - OpenAI-powered project analysis with structured saved results
-- Placeholder analysis and question routes
+- OpenAI-powered follow-up questions with saved Q&A history
+- Placeholder standalone analysis and question routes
 
 ## Security And Performance Foundations
 

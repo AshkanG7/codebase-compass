@@ -7,6 +7,7 @@ from app.models.user import User
 from app.schemas.analysis_schema import AnalysisRead
 from app.schemas.code_file_schema import CodeFileRead, CodeFileUploadRequest, CodeFileUploadResponse
 from app.schemas.project_schema import PaginatedProjects, ProjectCreate, ProjectDetail, ProjectRead
+from app.schemas.question_schema import PaginatedQuestions, QuestionAskRequest, QuestionRead
 from app.services.analysis_service import analyze_project
 from app.services.project_service import (
     add_code_files,
@@ -17,6 +18,12 @@ from app.services.project_service import (
     get_total_pages,
     list_project_files,
     list_projects as list_projects_service,
+)
+from app.services.question_service import (
+    ask_codebase_question,
+    get_total_pages as get_question_total_pages,
+    list_project_questions,
+    question_to_read,
 )
 
 
@@ -104,3 +111,32 @@ def get_project_files(
 ) -> list[CodeFileRead]:
     files = list_project_files(db, current_user, project_id)
     return [CodeFileRead.model_validate(code_file) for code_file in files]
+
+
+@router.post("/{project_id}/questions", response_model=QuestionRead, status_code=status.HTTP_201_CREATED)
+def ask_project_question(
+    project_id: int,
+    request: QuestionAskRequest,
+    db: Session = Depends(get_db_session),
+    current_user: User = Depends(get_current_user),
+) -> QuestionRead:
+    question = ask_codebase_question(db, current_user, project_id, request.question)
+    return QuestionRead.model_validate(question_to_read(question))
+
+
+@router.get("/{project_id}/questions", response_model=PaginatedQuestions)
+def get_project_questions(
+    project_id: int,
+    page: int = Query(default=1, ge=1),
+    page_size: int = Query(default=10, ge=1, le=100),
+    db: Session = Depends(get_db_session),
+    current_user: User = Depends(get_current_user),
+) -> PaginatedQuestions:
+    questions, total = list_project_questions(db, current_user, project_id, page, page_size)
+    return PaginatedQuestions(
+        items=[QuestionRead.model_validate(question_to_read(question)) for question in questions],
+        page=page,
+        page_size=page_size,
+        total=total,
+        total_pages=get_question_total_pages(total, page_size),
+    )
