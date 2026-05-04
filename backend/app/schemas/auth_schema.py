@@ -1,7 +1,9 @@
 from pydantic import BaseModel, EmailStr, Field
 
+from app.schemas.user_schema import UserRead
 
-class RegisterRequest(BaseModel):
+
+class SignupRequest(BaseModel):
     email: EmailStr
     password: str = Field(min_length=8, max_length=128)
     display_name: str | None = Field(default=None, max_length=120)
@@ -19,3 +21,8 @@ class AuthToken(BaseModel):
 
 class AuthMessage(BaseModel):
     detail: str
+
+
+class AuthResponse(BaseModel):
+    detail: str
+    user: UserRead

@@ -12,6 +12,9 @@ class Settings(BaseSettings):
         default="postgresql+psycopg2://postgres:postgres@localhost:5432/codebase_compass",
         alias="DATABASE_URL",
     )
+    jwt_secret: str = Field(default="change-me-to-a-long-random-development-secret", alias="JWT_SECRET")
+    jwt_algorithm: str = Field(default="HS256", alias="JWT_ALGORITHM")
+    access_token_expire_minutes: int = Field(default=15, alias="ACCESS_TOKEN_EXPIRE_MINUTES", ge=1, le=60)
 
     model_config = SettingsConfigDict(
         env_file=".env",

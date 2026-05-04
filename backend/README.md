@@ -1,6 +1,6 @@
 # Codebase Compass Backend
 
-Phase 1 backend foundation for Codebase Compass.
+Backend foundation for Codebase Compass.
 
 ## Setup
 
@@ -37,7 +37,59 @@ uvicorn app.main:app --reload
 
 The API will be available at `http://127.0.0.1:8000`.
 
-## Phase 1 Scope
+## Auth Configuration
+
+The backend uses bcrypt password hashing and short-lived JWT access tokens stored in an httpOnly cookie named `access_token`.
+
+Required auth environment variables:
+
+- `JWT_SECRET`: local development secret. Use a long random value and do not commit real secrets.
+- `JWT_ALGORITHM`: defaults to `HS256`.
+- `ACCESS_TOKEN_EXPIRE_MINUTES`: defaults to `15`.
+
+The `.env` file is ignored by git. Keep real secrets only in `.env` or your deployment secret manager.
+
+## Manual Auth Testing
+
+Run these commands from PowerShell after starting the API.
+
+Signup and save the auth cookie:
+
+```powershell
+curl.exe -i -c .\cookies.txt -H "Content-Type: application/json" -d "{\"email\":\"test@example.com\",\"password\":\"ChangeMe123!\",\"display_name\":\"Test User\"}" http://127.0.0.1:8000/auth/signup
+```
+
+Login and refresh the auth cookie:
+
+```powershell
+curl.exe -i -c .\cookies.txt -H "Content-Type: application/json" -d "{\"email\":\"test@example.com\",\"password\":\"ChangeMe123!\"}" http://127.0.0.1:8000/auth/login
+```
+
+Fetch the current user with the cookie:
+
+```powershell
+curl.exe -i -b .\cookies.txt http://127.0.0.1:8000/auth/me
+```
+
+Protected projects route without auth should fail with `401`:
+
+```powershell
+curl.exe -i http://127.0.0.1:8000/projects
+```
+
+Protected projects route with auth should reach the placeholder route and return `501`:
+
+```powershell
+curl.exe -i -b .\cookies.txt http://127.0.0.1:8000/projects
+```
+
+Logout clears the auth cookie:
+
+```powershell
+curl.exe -i -b .\cookies.txt -c .\cookies.txt -X POST http://127.0.0.1:8000/auth/logout
+```
+
+## Implemented Scope
 
 - FastAPI application startup
 - CORS configured from `FRONTEND_URL`
@@ -46,7 +98,8 @@ The API will be available at `http://127.0.0.1:8000`.
 - Initial `User`, `Project`, `CodeFile`, `Analysis`, and `Question` models
 - Initial Pydantic schemas
 - `GET /health`
-- Placeholder auth, project, analysis, and question routes
+- Secure signup, login, current-user, and logout auth routes
+- Placeholder project, analysis, and question routes
 
 ## Security And Performance Foundations
 
