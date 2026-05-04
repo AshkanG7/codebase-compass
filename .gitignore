@@ -25,6 +25,13 @@ ENV/
 .coverage
 htmlcov/
 
+# Frontend
+node_modules/
+.next/
+out/
+dist/
+*.tsbuildinfo
+
 # Editors
 .idea/
 .vscode/
