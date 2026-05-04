@@ -15,6 +15,7 @@ class CodeFile(Base):
     id: Mapped[int] = mapped_column(primary_key=True, index=True)
     project_id: Mapped[int] = mapped_column(ForeignKey("projects.id", ondelete="CASCADE"), index=True, nullable=False)
     path: Mapped[str] = mapped_column(String(500), nullable=False)
+    language: Mapped[str | None] = mapped_column(String(80), nullable=True)
     extension: Mapped[str] = mapped_column(String(32), index=True, nullable=False)
     size_bytes: Mapped[int] = mapped_column(Integer, nullable=False)
     content: Mapped[str] = mapped_column(Text, nullable=False)
