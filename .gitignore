@@ -28,3 +28,6 @@ htmlcov/
 # Editors
 .idea/
 .vscode/
+
+cookies.txt
+backend/cookies.txt
