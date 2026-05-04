@@ -4,9 +4,10 @@ from sqlalchemy.orm import Session
 from app.database import get_db_session
 from app.dependencies import get_current_user
 from app.models.user import User
-from app.schemas.code_file_schema import CodeFileRead, CodeFileUploadRequest, CodeFileUploadResponse
 from app.schemas.analysis_schema import AnalysisRead
+from app.schemas.code_file_schema import CodeFileRead, CodeFileUploadRequest, CodeFileUploadResponse
 from app.schemas.project_schema import PaginatedProjects, ProjectCreate, ProjectDetail, ProjectRead
+from app.services.analysis_service import analyze_project
 from app.services.project_service import (
     add_code_files,
     create_project as create_project_service,
@@ -63,6 +64,16 @@ def get_project(
         files=[CodeFileRead.model_validate(code_file) for code_file in files],
         latest_analysis=AnalysisRead.model_validate(latest_analysis) if latest_analysis else None,
     )
+
+
+@router.post("/{project_id}/analyze", response_model=AnalysisRead, status_code=status.HTTP_201_CREATED)
+def analyze_project_route(
+    project_id: int,
+    db: Session = Depends(get_db_session),
+    current_user: User = Depends(get_current_user),
+) -> AnalysisRead:
+    analysis = analyze_project(db, current_user, project_id)
+    return AnalysisRead.model_validate(analysis)
 
 
 @router.delete("/{project_id}", status_code=status.HTTP_204_NO_CONTENT)

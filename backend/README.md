@@ -49,6 +49,16 @@ Required auth environment variables:
 
 The `.env` file is ignored by git. Keep real secrets only in `.env` or your deployment secret manager.
 
+## OpenAI Configuration
+
+Phase 4 uses the official OpenAI Python package and the Responses API to analyze stored code files as untrusted plain text. Add these variables to `.env`:
+
+- `OPENAI_API_KEY`: your OpenAI API key. Leave empty in local development if you want analysis requests to fail safely.
+- `OPENAI_MODEL`: defaults to `gpt-4.1-mini`.
+- `OPENAI_TIMEOUT_SECONDS`: defaults to `30`.
+
+The analysis prompt explicitly ignores instructions inside uploaded files, sends redacted file content only, and requests structured JSON.
+
 ## Manual Auth Testing
 
 Run these commands from PowerShell after starting the API.
@@ -167,6 +177,74 @@ Confirm unauthenticated requests fail:
 Invoke-WebRequest -Method Get -Uri "http://127.0.0.1:8000/projects" -SkipHttpErrorCheck
 ```
 
+## Manual AI Analysis Testing
+
+If you ran earlier phases against the same database, recreate the development database or add a migration before testing because Phase 4 adds structured analysis columns.
+
+Login:
+
+```powershell
+$session = New-Object Microsoft.PowerShell.Commands.WebRequestSession
+$loginBody = @{ email = "phase4@example.com"; password = "ChangeMe123!" } | ConvertTo-Json
+try {
+  Invoke-RestMethod -Method Post -Uri "http://127.0.0.1:8000/auth/signup" -WebSession $session -ContentType "application/json" -Body (@{ email = "phase4@example.com"; password = "ChangeMe123!"; display_name = "Phase 4 User" } | ConvertTo-Json)
+} catch {}
+Invoke-RestMethod -Method Post -Uri "http://127.0.0.1:8000/auth/login" -WebSession $session -ContentType "application/json" -Body $loginBody
+```
+
+Create a project:
+
+```powershell
+$projectBody = @{ name = "Phase 4 Sample"; description = "AI analysis smoke test" } | ConvertTo-Json
+$project = Invoke-RestMethod -Method Post -Uri "http://127.0.0.1:8000/projects" -WebSession $session -ContentType "application/json" -Body $projectBody
+$projectId = $project.id
+```
+
+Add files:
+
+```powershell
+$filesBody = @{
+  files = @(
+    @{
+      path = "package.json"
+      language = "JSON"
+      content = "{ `"scripts`": { `"dev`": `"next dev`" }, `"dependencies`": { `"next`": `"latest`", `"react`": `"latest`" } }"
+    },
+    @{
+      path = "src/App.tsx"
+      language = "TypeScript"
+      content = "const apiKey = 'sk-test-should-redact';`nexport default function App() { return <main>Hello</main>; }"
+    }
+  )
+} | ConvertTo-Json -Depth 5
+Invoke-RestMethod -Method Post -Uri "http://127.0.0.1:8000/projects/$projectId/files" -WebSession $session -ContentType "application/json" -Body $filesBody
+```
+
+Analyze the project:
+
+```powershell
+Invoke-RestMethod -Method Post -Uri "http://127.0.0.1:8000/projects/$projectId/analyze" -WebSession $session
+```
+
+Get the project and confirm `latest_analysis` is included:
+
+```powershell
+Invoke-RestMethod -Method Get -Uri "http://127.0.0.1:8000/projects/$projectId" -WebSession $session
+```
+
+Test analyzing an empty project fails safely:
+
+```powershell
+$emptyProject = Invoke-RestMethod -Method Post -Uri "http://127.0.0.1:8000/projects" -WebSession $session -ContentType "application/json" -Body (@{ name = "Empty Project" } | ConvertTo-Json)
+Invoke-WebRequest -Method Post -Uri "http://127.0.0.1:8000/projects/$($emptyProject.id)/analyze" -WebSession $session -SkipHttpErrorCheck
+```
+
+Test unauthenticated analyze fails:
+
+```powershell
+Invoke-WebRequest -Method Post -Uri "http://127.0.0.1:8000/projects/$projectId/analyze" -SkipHttpErrorCheck
+```
+
 ## Implemented Scope
 
 - FastAPI application startup
@@ -178,6 +256,7 @@ Invoke-WebRequest -Method Get -Uri "http://127.0.0.1:8000/projects" -SkipHttpErr
 - `GET /health`
 - Secure signup, login, current-user, and logout auth routes
 - Authenticated project creation, pagination, lookup, deletion, and secure code file storage
+- OpenAI-powered project analysis with structured saved results
 - Placeholder analysis and question routes
 
 ## Security And Performance Foundations
