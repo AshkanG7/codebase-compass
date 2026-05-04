@@ -35,7 +35,7 @@ Run the API:
 uvicorn app.main:app --reload
 ```
 
-The API will be available at `http://127.0.0.1:8000`.
+The API will be available at `http://localhost:8000`.
 
 ## Auth Configuration
 
@@ -66,37 +66,37 @@ Run these commands from PowerShell after starting the API.
 Signup and save the auth cookie:
 
 ```powershell
-curl.exe -i -c .\cookies.txt -H "Content-Type: application/json" -d "{\"email\":\"test@example.com\",\"password\":\"ChangeMe123!\",\"display_name\":\"Test User\"}" http://127.0.0.1:8000/auth/signup
+curl.exe -i -c .\cookies.txt -H "Content-Type: application/json" -d "{\"email\":\"test@example.com\",\"password\":\"ChangeMe123!\",\"display_name\":\"Test User\"}" http://localhost:8000/auth/signup
 ```
 
 Login and refresh the auth cookie:
 
 ```powershell
-curl.exe -i -c .\cookies.txt -H "Content-Type: application/json" -d "{\"email\":\"test@example.com\",\"password\":\"ChangeMe123!\"}" http://127.0.0.1:8000/auth/login
+curl.exe -i -c .\cookies.txt -H "Content-Type: application/json" -d "{\"email\":\"test@example.com\",\"password\":\"ChangeMe123!\"}" http://localhost:8000/auth/login
 ```
 
 Fetch the current user with the cookie:
 
 ```powershell
-curl.exe -i -b .\cookies.txt http://127.0.0.1:8000/auth/me
+curl.exe -i -b .\cookies.txt http://localhost:8000/auth/me
 ```
 
 Protected projects route without auth should fail with `401`:
 
 ```powershell
-curl.exe -i http://127.0.0.1:8000/projects
+curl.exe -i http://localhost:8000/projects
 ```
 
 Protected projects route with auth should return the user's paginated projects:
 
 ```powershell
-curl.exe -i -b .\cookies.txt http://127.0.0.1:8000/projects
+curl.exe -i -b .\cookies.txt http://localhost:8000/projects
 ```
 
 Logout clears the auth cookie:
 
 ```powershell
-curl.exe -i -b .\cookies.txt -c .\cookies.txt -X POST http://127.0.0.1:8000/auth/logout
+curl.exe -i -b .\cookies.txt -c .\cookies.txt -X POST http://localhost:8000/auth/logout
 ```
 
 ## Manual Project And File Testing
@@ -108,7 +108,7 @@ Create an account once if needed:
 ```powershell
 $session = New-Object Microsoft.PowerShell.Commands.WebRequestSession
 $signupBody = @{ email = "phase3@example.com"; password = "ChangeMe123!"; display_name = "Phase 3 User" } | ConvertTo-Json
-Invoke-RestMethod -Method Post -Uri "http://127.0.0.1:8000/auth/signup" -WebSession $session -ContentType "application/json" -Body $signupBody
+Invoke-RestMethod -Method Post -Uri "http://localhost:8000/auth/signup" -WebSession $session -ContentType "application/json" -Body $signupBody
 ```
 
 Login:
@@ -116,21 +116,21 @@ Login:
 ```powershell
 $session = New-Object Microsoft.PowerShell.Commands.WebRequestSession
 $loginBody = @{ email = "phase3@example.com"; password = "ChangeMe123!" } | ConvertTo-Json
-Invoke-RestMethod -Method Post -Uri "http://127.0.0.1:8000/auth/login" -WebSession $session -ContentType "application/json" -Body $loginBody
+Invoke-RestMethod -Method Post -Uri "http://localhost:8000/auth/login" -WebSession $session -ContentType "application/json" -Body $loginBody
 ```
 
 Create a project:
 
 ```powershell
 $projectBody = @{ name = "My React App"; description = "Optional description" } | ConvertTo-Json
-$project = Invoke-RestMethod -Method Post -Uri "http://127.0.0.1:8000/projects" -WebSession $session -ContentType "application/json" -Body $projectBody
+$project = Invoke-RestMethod -Method Post -Uri "http://localhost:8000/projects" -WebSession $session -ContentType "application/json" -Body $projectBody
 $projectId = $project.id
 ```
 
 Get paginated projects:
 
 ```powershell
-Invoke-RestMethod -Method Get -Uri "http://127.0.0.1:8000/projects?page=1&page_size=10" -WebSession $session
+Invoke-RestMethod -Method Get -Uri "http://localhost:8000/projects?page=1&page_size=10" -WebSession $session
 ```
 
 Add code files. Secrets are redacted before saving:
@@ -150,31 +150,31 @@ $filesBody = @{
     }
   )
 } | ConvertTo-Json -Depth 5
-Invoke-RestMethod -Method Post -Uri "http://127.0.0.1:8000/projects/$projectId/files" -WebSession $session -ContentType "application/json" -Body $filesBody
+Invoke-RestMethod -Method Post -Uri "http://localhost:8000/projects/$projectId/files" -WebSession $session -ContentType "application/json" -Body $filesBody
 ```
 
 Get project files:
 
 ```powershell
-Invoke-RestMethod -Method Get -Uri "http://127.0.0.1:8000/projects/$projectId/files" -WebSession $session
+Invoke-RestMethod -Method Get -Uri "http://localhost:8000/projects/$projectId/files" -WebSession $session
 ```
 
 Get one project with files and latest analysis:
 
 ```powershell
-Invoke-RestMethod -Method Get -Uri "http://127.0.0.1:8000/projects/$projectId" -WebSession $session
+Invoke-RestMethod -Method Get -Uri "http://localhost:8000/projects/$projectId" -WebSession $session
 ```
 
 Delete the project:
 
 ```powershell
-Invoke-RestMethod -Method Delete -Uri "http://127.0.0.1:8000/projects/$projectId" -WebSession $session
+Invoke-RestMethod -Method Delete -Uri "http://localhost:8000/projects/$projectId" -WebSession $session
 ```
 
 Confirm unauthenticated requests fail:
 
 ```powershell
-Invoke-WebRequest -Method Get -Uri "http://127.0.0.1:8000/projects" -SkipHttpErrorCheck
+Invoke-WebRequest -Method Get -Uri "http://localhost:8000/projects" -SkipHttpErrorCheck
 ```
 
 ## Manual AI Analysis Testing
@@ -187,16 +187,16 @@ Login:
 $session = New-Object Microsoft.PowerShell.Commands.WebRequestSession
 $loginBody = @{ email = "phase4@example.com"; password = "ChangeMe123!" } | ConvertTo-Json
 try {
-  Invoke-RestMethod -Method Post -Uri "http://127.0.0.1:8000/auth/signup" -WebSession $session -ContentType "application/json" -Body (@{ email = "phase4@example.com"; password = "ChangeMe123!"; display_name = "Phase 4 User" } | ConvertTo-Json)
+  Invoke-RestMethod -Method Post -Uri "http://localhost:8000/auth/signup" -WebSession $session -ContentType "application/json" -Body (@{ email = "phase4@example.com"; password = "ChangeMe123!"; display_name = "Phase 4 User" } | ConvertTo-Json)
 } catch {}
-Invoke-RestMethod -Method Post -Uri "http://127.0.0.1:8000/auth/login" -WebSession $session -ContentType "application/json" -Body $loginBody
+Invoke-RestMethod -Method Post -Uri "http://localhost:8000/auth/login" -WebSession $session -ContentType "application/json" -Body $loginBody
 ```
 
 Create a project:
 
 ```powershell
 $projectBody = @{ name = "Phase 4 Sample"; description = "AI analysis smoke test" } | ConvertTo-Json
-$project = Invoke-RestMethod -Method Post -Uri "http://127.0.0.1:8000/projects" -WebSession $session -ContentType "application/json" -Body $projectBody
+$project = Invoke-RestMethod -Method Post -Uri "http://localhost:8000/projects" -WebSession $session -ContentType "application/json" -Body $projectBody
 $projectId = $project.id
 ```
 
@@ -217,32 +217,32 @@ $filesBody = @{
     }
   )
 } | ConvertTo-Json -Depth 5
-Invoke-RestMethod -Method Post -Uri "http://127.0.0.1:8000/projects/$projectId/files" -WebSession $session -ContentType "application/json" -Body $filesBody
+Invoke-RestMethod -Method Post -Uri "http://localhost:8000/projects/$projectId/files" -WebSession $session -ContentType "application/json" -Body $filesBody
 ```
 
 Analyze the project:
 
 ```powershell
-Invoke-RestMethod -Method Post -Uri "http://127.0.0.1:8000/projects/$projectId/analyze" -WebSession $session
+Invoke-RestMethod -Method Post -Uri "http://localhost:8000/projects/$projectId/analyze" -WebSession $session
 ```
 
 Get the project and confirm `latest_analysis` is included:
 
 ```powershell
-Invoke-RestMethod -Method Get -Uri "http://127.0.0.1:8000/projects/$projectId" -WebSession $session
+Invoke-RestMethod -Method Get -Uri "http://localhost:8000/projects/$projectId" -WebSession $session
 ```
 
 Test analyzing an empty project fails safely:
 
 ```powershell
-$emptyProject = Invoke-RestMethod -Method Post -Uri "http://127.0.0.1:8000/projects" -WebSession $session -ContentType "application/json" -Body (@{ name = "Empty Project" } | ConvertTo-Json)
-Invoke-WebRequest -Method Post -Uri "http://127.0.0.1:8000/projects/$($emptyProject.id)/analyze" -WebSession $session -SkipHttpErrorCheck
+$emptyProject = Invoke-RestMethod -Method Post -Uri "http://localhost:8000/projects" -WebSession $session -ContentType "application/json" -Body (@{ name = "Empty Project" } | ConvertTo-Json)
+Invoke-WebRequest -Method Post -Uri "http://localhost:8000/projects/$($emptyProject.id)/analyze" -WebSession $session -SkipHttpErrorCheck
 ```
 
 Test unauthenticated analyze fails:
 
 ```powershell
-Invoke-WebRequest -Method Post -Uri "http://127.0.0.1:8000/projects/$projectId/analyze" -SkipHttpErrorCheck
+Invoke-WebRequest -Method Post -Uri "http://localhost:8000/projects/$projectId/analyze" -SkipHttpErrorCheck
 ```
 
 ## Manual Follow-Up Question Testing
@@ -253,15 +253,15 @@ Login:
 $session = New-Object Microsoft.PowerShell.Commands.WebRequestSession
 $loginBody = @{ email = "phase5@example.com"; password = "ChangeMe123!" } | ConvertTo-Json
 try {
-  Invoke-RestMethod -Method Post -Uri "http://127.0.0.1:8000/auth/signup" -WebSession $session -ContentType "application/json" -Body (@{ email = "phase5@example.com"; password = "ChangeMe123!"; display_name = "Phase 5 User" } | ConvertTo-Json)
+  Invoke-RestMethod -Method Post -Uri "http://localhost:8000/auth/signup" -WebSession $session -ContentType "application/json" -Body (@{ email = "phase5@example.com"; password = "ChangeMe123!"; display_name = "Phase 5 User" } | ConvertTo-Json)
 } catch {}
-Invoke-RestMethod -Method Post -Uri "http://127.0.0.1:8000/auth/login" -WebSession $session -ContentType "application/json" -Body $loginBody
+Invoke-RestMethod -Method Post -Uri "http://localhost:8000/auth/login" -WebSession $session -ContentType "application/json" -Body $loginBody
 ```
 
 Create a project:
 
 ```powershell
-$project = Invoke-RestMethod -Method Post -Uri "http://127.0.0.1:8000/projects" -WebSession $session -ContentType "application/json" -Body (@{ name = "Phase 5 Sample"; description = "Question answering smoke test" } | ConvertTo-Json)
+$project = Invoke-RestMethod -Method Post -Uri "http://localhost:8000/projects" -WebSession $session -ContentType "application/json" -Body (@{ name = "Phase 5 Sample"; description = "Question answering smoke test" } | ConvertTo-Json)
 $projectId = $project.id
 ```
 
@@ -282,32 +282,32 @@ $filesBody = @{
     }
   )
 } | ConvertTo-Json -Depth 5
-Invoke-RestMethod -Method Post -Uri "http://127.0.0.1:8000/projects/$projectId/files" -WebSession $session -ContentType "application/json" -Body $filesBody
+Invoke-RestMethod -Method Post -Uri "http://localhost:8000/projects/$projectId/files" -WebSession $session -ContentType "application/json" -Body $filesBody
 ```
 
 Analyze the project:
 
 ```powershell
-Invoke-RestMethod -Method Post -Uri "http://127.0.0.1:8000/projects/$projectId/analyze" -WebSession $session
+Invoke-RestMethod -Method Post -Uri "http://localhost:8000/projects/$projectId/analyze" -WebSession $session
 ```
 
 Ask a follow-up question:
 
 ```powershell
 $questionBody = @{ question = "Where does this app start?" } | ConvertTo-Json
-Invoke-RestMethod -Method Post -Uri "http://127.0.0.1:8000/projects/$projectId/questions" -WebSession $session -ContentType "application/json" -Body $questionBody
+Invoke-RestMethod -Method Post -Uri "http://localhost:8000/projects/$projectId/questions" -WebSession $session -ContentType "application/json" -Body $questionBody
 ```
 
 Get question history:
 
 ```powershell
-Invoke-RestMethod -Method Get -Uri "http://127.0.0.1:8000/projects/$projectId/questions?page=1&page_size=10" -WebSession $session
+Invoke-RestMethod -Method Get -Uri "http://localhost:8000/projects/$projectId/questions?page=1&page_size=10" -WebSession $session
 ```
 
 Confirm unauthenticated question requests fail:
 
 ```powershell
-Invoke-WebRequest -Method Post -Uri "http://127.0.0.1:8000/projects/$projectId/questions" -ContentType "application/json" -Body $questionBody -SkipHttpErrorCheck
+Invoke-WebRequest -Method Post -Uri "http://localhost:8000/projects/$projectId/questions" -ContentType "application/json" -Body $questionBody -SkipHttpErrorCheck
 ```
 
 Confirm another user cannot ask questions about the first user's project:
@@ -315,10 +315,10 @@ Confirm another user cannot ask questions about the first user's project:
 ```powershell
 $otherSession = New-Object Microsoft.PowerShell.Commands.WebRequestSession
 try {
-  Invoke-RestMethod -Method Post -Uri "http://127.0.0.1:8000/auth/signup" -WebSession $otherSession -ContentType "application/json" -Body (@{ email = "phase5-other@example.com"; password = "ChangeMe123!"; display_name = "Other User" } | ConvertTo-Json)
+  Invoke-RestMethod -Method Post -Uri "http://localhost:8000/auth/signup" -WebSession $otherSession -ContentType "application/json" -Body (@{ email = "phase5-other@example.com"; password = "ChangeMe123!"; display_name = "Other User" } | ConvertTo-Json)
 } catch {}
-Invoke-RestMethod -Method Post -Uri "http://127.0.0.1:8000/auth/login" -WebSession $otherSession -ContentType "application/json" -Body (@{ email = "phase5-other@example.com"; password = "ChangeMe123!" } | ConvertTo-Json)
-Invoke-WebRequest -Method Post -Uri "http://127.0.0.1:8000/projects/$projectId/questions" -WebSession $otherSession -ContentType "application/json" -Body $questionBody -SkipHttpErrorCheck
+Invoke-RestMethod -Method Post -Uri "http://localhost:8000/auth/login" -WebSession $otherSession -ContentType "application/json" -Body (@{ email = "phase5-other@example.com"; password = "ChangeMe123!" } | ConvertTo-Json)
+Invoke-WebRequest -Method Post -Uri "http://localhost:8000/projects/$projectId/questions" -WebSession $otherSession -ContentType "application/json" -Body $questionBody -SkipHttpErrorCheck
 ```
 
 ## Implemented Scope
