@@ -27,8 +27,8 @@ export function Navbar({ user }: { user?: User | null }) {
     <header className="sticky top-0 z-20 border-b border-slate-200 bg-paper/95 backdrop-blur">
       <div className="mx-auto flex min-h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         <Link href={user ? "/dashboard" : "/"} className="flex items-center gap-3 font-semibold text-ink">
-          <span className="grid h-9 w-9 place-items-center rounded-md bg-moss text-white">CC</span>
-          <span>Codebase Compass</span>
+          <span className="grid h-9 w-9 place-items-center rounded-md bg-moss text-white">RR</span>
+          <span>RepoRadar</span>
         </Link>
         <nav className="flex items-center gap-2">
           {user ? (

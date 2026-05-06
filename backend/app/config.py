@@ -5,7 +5,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
-    app_name: str = "Codebase Compass API"
+    app_name: str = "RepoRadar API"
     environment: str = Field(default="development", alias="ENVIRONMENT")
     frontend_url: str = Field(default="http://localhost:3000", alias="FRONTEND_URL")
     database_url: str = Field(

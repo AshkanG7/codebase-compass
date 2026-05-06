@@ -12,10 +12,10 @@ export default function HomePage() {
           <div className="flex flex-col justify-center">
             <p className="text-sm font-bold uppercase tracking-[0.18em] text-coral">Secure codebase orientation</p>
             <h1 className="mt-5 max-w-4xl text-5xl font-bold leading-tight text-ink sm:text-6xl">
-              Codebase Compass
+              RepoRadar
             </h1>
             <p className="mt-6 max-w-2xl text-lg leading-8 text-slate-700">
-              Upload or paste source files, get a structured map of the stack and architecture, then ask grounded follow-up questions about the code.
+              A full-stack app for getting a quick overview of an unfamiliar codebase.
             </p>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
               <Link href="/signup">

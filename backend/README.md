@@ -1,6 +1,6 @@
-# Codebase Compass Backend
+# RepoRadar Backend
 
-Backend foundation for Codebase Compass.
+Backend for RepoRadar.
 
 ## Setup
 

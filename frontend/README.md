@@ -1,6 +1,6 @@
-# Codebase Compass Frontend
+# RepoRadar Frontend
 
-Next.js App Router frontend for the Codebase Compass MVP.
+Next.js App Router frontend for RepoRadar.
 
 ## Setup
 

@@ -1,8 +1,8 @@
-# Codebase Compass
+# RepoRadar
 
-**Secure AI codebase onboarding assistant**
+**A full-stack app for getting a quick overview of an unfamiliar codebase.**
 
-Codebase Compass helps developers understand unfamiliar codebases without executing uploaded code. Users create projects, upload or paste source files, run AI-generated analysis, and ask follow-up questions grounded in their own project files.
+RepoRadar helps developers understand unfamiliar codebases without executing uploaded code. Users create projects, upload or paste source files, run AI-generated analysis, and ask follow-up questions about their own project files.
 
 ## Screenshots
 
@@ -115,4 +115,4 @@ NEXT_PUBLIC_API_URL=http://localhost:8000
 
 ## Resume Bullet
 
-Built **Codebase Compass**, a full-stack AI onboarding assistant with Next.js, FastAPI, PostgreSQL, OpenAI structured outputs, httpOnly cookie authentication, per-user project authorization, secure file validation, secret redaction, and grounded follow-up Q&A over uploaded codebases.
+Built **RepoRadar**, a full-stack app with Next.js, FastAPI, PostgreSQL, OpenAI analysis, httpOnly cookie authentication, per-user project authorization, file validation, secret redaction, and follow-up questions over uploaded codebases.

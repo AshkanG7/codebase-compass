@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Codebase Compass",
-  description: "Understand uploaded codebases without executing them.",
+  title: "RepoRadar",
+  description: "A full-stack app for getting a quick overview of an unfamiliar codebase.",
 };
 
 export default function RootLayout({
